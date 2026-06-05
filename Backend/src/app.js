@@ -1,30 +1,48 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-// const ticketRoutes = require('./routes/ticketRoutes');
-// const dashRoutes = require('./routes/dashboardRoutes');
-// const { errorHandler } = require('./middleware/errorMiddleware');
+/**
+ * Express Application Configuration
+ * Sets up middleware, routing, and error handling for the application.
+ */
+
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+
+// Route imports
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const ticketRoutes = require("./routes/ticketRoutes");
+const dashRoutes = require("./routes/dashboardRoutes");
+const { errorHandler } = require("./middleware/errorMiddleware");
+
 const app = express();
 
+// Global Middleware Setup
+// Helmet helps secure Express apps by setting various HTTP headers
 app.use(helmet());
 
-app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
+// Enable CORS with credentials support (allow frontend to send cookies/tokens)
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  })
+);
 
+// Built-in middleware for parsing JSON bodies
 app.use(express.json());
 
-app.use(morgan('dev'));
+// Morgan is used for logging HTTP requests in development
+app.use(morgan("dev"));
 
-// app.use('/api/auth', authRoutes);
+// API Routes mounting
+app.use("/api/auth", authRoutes);       // Authentication routes (login, register)
+app.use("/api/users", userRoutes);      // User management routes
+app.use("/api/tickets", ticketRoutes);  // Ticket management routes
+app.use("/api/dashboard", dashRoutes);  // Dashboard statistics routes
 
-// // app.use('/api/users', userRoutes);
-
-// // app.use('/api/tickets', ticketRoutes);
-
-// // app.use('/api/dashboard', dashRoutes);
-
-// app.use(errorHandler);
+// Global Error Handling Middleware
+// Should be the last middleware added so it catches all errors
+app.use(errorHandler);
 
 module.exports = app;

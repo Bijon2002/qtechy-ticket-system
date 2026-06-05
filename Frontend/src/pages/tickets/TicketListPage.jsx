@@ -1,94 +1,249 @@
-import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchTickets } from '../../features/tickets/ticketSlice';
-import { useNavigate } from 'react-router-dom';
+/**
+ * Ticket List Page
+ * Displays a paginated, filterable, and sortable list of tickets.
+ */
+
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTickets, deleteTicket } from "../../features/tickets/ticketSlice";
+import { useNavigate } from "react-router-dom";
+
 export default function TicketListPage() {
-const dispatch = useDispatch();
-const navigate = useNavigate();
-const { list, total, pages, loading } = useSelector(s => s.tickets);
-const { user } = useSelector(s => s.auth);
-const [params, setParams] = useState({ page:1, limit:10, search:'', status:'', priority:'',
-sort:'-createdAt' });
-useEffect(() => { dispatch(fetchTickets(params)); }, [params]);
-const handleSearch = (e) => setParams(p => ({ ...p, search: e.target.value, page: 1 }));
-return (
-<div className='p-6'>
-<div className='flex justify-between mb-4'>
-<h1 className='text-xl font-bold'>Tickets</h1>
-{(user?.role==='admin'||user?.role==='user') &&
-<button onClick={()=>navigate('/tickets/create')} className='bg-blue-600 text-white px-4 py-2 rounded'>
-+ New Ticket
-</button>}
-</div>
-{/* Search + Filters */}
-<div className='flex gap-3 mb-4 flex-wrap'>
-<input placeholder='Search...' value={params.search} onChange={handleSearch}
-className='border rounded px-3 py-2 flex-1 min-w-[150px]' />
-<select value={params.status} onChange={e=>setParams(p=>({...p,status:e.target.value,page:1}))}
-className='border rounded px-3 py-2'>
-<option value=''>All Status</option>
-{['Open','In Progress','Resolved','Closed'].map(s=><option key={s}>{s}</option>)}
-</select>
-<select value={params.priority} onChange={e=>setParams(p=>({...p,priority:e.target.value,page:1}))}
-className='border rounded px-3 py-2'>
-<option value=''>All Priority</option>
-{['Low','Medium','High','Urgent'].map(p=><option key={p}>{p}</option>)}
-</select>
-</div>
-{/* Table */}
-<div className='bg-white rounded-xl shadow overflow-x-auto'>
-<table className='w-full text-sm'>
-<thead className='bg-gray-50 text-gray-500 uppercase text-xs'>
-<tr></tr>
-{['#','Title','Category','Priority','Status','Created','Actions'].map(h=>(
-<th key={h} className='px-4 py-3 text-left'>{h}</th>
-))}
-</tr>
-</thead>
-<tbody>
-{loading ? (
-<tr><td colSpan={7} className='text-center py-6'>Loading...</td></tr>
-) : list.map(t => (
-<tr key={t._id} className='border-t hover:bg-gray-50'>
-<td className='px-4 py-3 font-mono text-xs text-blue-500'>{t.ticketNumber}</td>
-<td className='px-4 py-3'>{t.title}</td>
-<td className='px-4 py-3'>{t.category}</td>
-<td className='px-4 py-3'><PriorityBadge p={t.priority} /></td>
-<td className='px-4 py-3'><StatusBadge s={t.status} /></td>
-<td className='px-4 py-3 text-xs text-gray-400'>{new Date(t.createdAt).toLocaleDateString()}</td>
-<td className='px-4 py-3'>
-<button onClick={()=>navigate(`/tickets/${t._id}`)} className='text-blue-600 mr-2'>View</button>
-{user?.role==='admin' && <>
-<button onClick={()=>navigate(`/tickets/${t._id}/edit`)} className='text-green-600 mr-2'>Edit</button>
-<button onClick={()=>dispatch(deleteTicket(t._id))} className='text-red-500'>Del</button>
-</>}
-</td>
-</tr>
-))}
-</tbody>
-</table>
-</div>
-{/* Pagination */}
-<div className='flex justify-between items-center mt-4'>
-<p className='text-sm text-gray-500'>Showing {list.length} of {total}</p>
-<div className='flex gap-2'>
-<button disabled={params.page<=1} onClick={()=>setParams(p=>({...p,page:p.page-1}))}
-className='px-3 py-1 border rounded disabled:opacity-40'>Prev</button>
-<span className='px-3 py-1'>{params.page} / {pages}</span>
-<button disabled={params.page>=pages} onClick={()=>setParams(p=>({...p,page:p.page+1}))}
-className='px-3 py-1 border rounded disabled:opacity-40'>Next</button>
-</div>
-</div>
-</div>
-);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  
+  // Extract state from Redux store
+  const { list, total, pages, loading } = useSelector((state) => state.tickets);
+  const { user } = useSelector((state) => state.auth);
+  
+  // Local state for pagination, search, and filtering
+  const [params, setParams] = useState({
+    page: 1,
+    limit: 10,
+    search: "",
+    status: "",
+    priority: "",
+    sort: "-createdAt",
+  });
+  
+  // Fetch tickets whenever params change
+  useEffect(() => {
+    dispatch(fetchTickets(params));
+  }, [params, dispatch]);
+  
+  /**
+   * Handle search input change (resets to page 1)
+   */
+  const handleSearch = (e) => {
+    setParams((p) => ({ ...p, search: e.target.value, page: 1 }));
+  };
+    
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Tickets</h1>
+        
+        {/* Only Admin and User roles can create tickets */}
+        {(user?.role === "admin" || user?.role === "user") && (
+          <button
+            onClick={() => navigate("/tickets/create")}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors font-medium shadow-sm"
+          >
+            + New Ticket
+          </button>
+        )}
+      </div>
+      
+      {/* Search & Filters Section */}
+      <div className="flex gap-3 mb-6 flex-wrap bg-white p-4 rounded-xl shadow-sm">
+        <input
+          placeholder="Search tickets..."
+          value={params.search}
+          onChange={handleSearch}
+          className="border rounded px-3 py-2 flex-1 min-w-[200px] focus:outline-none focus:border-blue-500"
+        />
+        <select
+          value={params.status}
+          onChange={(e) =>
+            setParams((p) => ({ ...p, status: e.target.value, page: 1 }))
+          }
+          className="border rounded px-3 py-2 focus:outline-none focus:border-blue-500 bg-white min-w-[150px]"
+        >
+          <option value="">All Statuses</option>
+          {["Open", "In Progress", "Resolved", "Closed"].map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+        <select
+          value={params.priority}
+          onChange={(e) =>
+            setParams((p) => ({ ...p, priority: e.target.value, page: 1 }))
+          }
+          className="border rounded px-3 py-2 focus:outline-none focus:border-blue-500 bg-white min-w-[150px]"
+        >
+          <option value="">All Priorities</option>
+          {["Low", "Medium", "High", "Urgent"].map((p) => (
+            <option key={p} value={p}>{p}</option>
+          ))}
+        </select>
+      </div>
+      
+      {/* Data Table */}
+      <div className="bg-white rounded-xl shadow overflow-hidden border border-gray-100">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-gray-50 text-gray-500 uppercase text-xs border-b">
+              <tr>
+                {[
+                  "#",
+                  "Title",
+                  "Category",
+                  "Priority",
+                  "Status",
+                  "Created",
+                  "Actions",
+                ].map((header) => (
+                  <th key={header} className="px-5 py-4 font-semibold tracking-wider">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-10 text-gray-500">
+                    Loading tickets...
+                  </td>
+                </tr>
+              ) : list.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-10 text-gray-500">
+                    No tickets found matching your criteria.
+                  </td>
+                </tr>
+              ) : (
+                list.map((ticket) => (
+                  <tr key={ticket._id} className="hover:bg-blue-50/50 transition-colors">
+                    <td className="px-5 py-4 font-mono text-xs font-semibold text-blue-600">
+                      {ticket.ticketNumber}
+                    </td>
+                    <td className="px-5 py-4 font-medium text-gray-800">
+                      {ticket.title}
+                    </td>
+                    <td className="px-5 py-4 text-gray-600">
+                      {ticket.category}
+                    </td>
+                    <td className="px-5 py-4">
+                      <PriorityBadge priority={ticket.priority} />
+                    </td>
+                    <td className="px-5 py-4">
+                      <StatusBadge status={ticket.status} />
+                    </td>
+                    <td className="px-5 py-4 text-xs text-gray-500">
+                      {new Date(ticket.createdAt).toLocaleDateString(undefined, {
+                        year: 'numeric', month: 'short', day: 'numeric'
+                      })}
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => navigate(`/tickets/${ticket._id}`)}
+                        className="text-blue-600 hover:text-blue-900 mr-3 transition-colors"
+                      >
+                        View
+                      </button>
+                      
+                      {/* Admin-only actions */}
+                      {user?.role === "admin" && (
+                        <>
+                          <button
+                            onClick={() => navigate(`/tickets/${ticket._id}/edit`)}
+                            className="text-emerald-600 hover:text-emerald-900 mr-3 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => {
+                              if(window.confirm("Are you sure you want to delete this ticket?")) {
+                                dispatch(deleteTicket(ticket._id));
+                              }
+                            }}
+                            className="text-red-600 hover:text-red-900 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Pagination Controls */}
+      {!loading && list.length > 0 && (
+        <div className="flex justify-between items-center mt-6">
+          <p className="text-sm text-gray-600">
+            Showing <span className="font-medium">{list.length}</span> of <span className="font-medium">{total}</span> tickets
+          </p>
+          <div className="flex gap-2 items-center">
+            <button
+              disabled={params.page <= 1}
+              onClick={() => setParams((p) => ({ ...p, page: p.page - 1 }))}
+              className="px-4 py-2 border rounded-md disabled:opacity-40 hover:bg-gray-50 transition-colors text-sm font-medium"
+            >
+              Previous
+            </button>
+            <span className="px-4 py-2 text-sm text-gray-600 font-medium">
+              Page {params.page} of {pages || 1}
+            </span>
+            <button
+              disabled={params.page >= pages}
+              onClick={() => setParams((p) => ({ ...p, page: p.page + 1 }))}
+              className="px-4 py-2 border rounded-md disabled:opacity-40 hover:bg-gray-50 transition-colors text-sm font-medium"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
-const PriorityBadge = ({ p }) => {
-const c={Low:'bg-gray-100',Medium:'bg-blue-100 text-blue-700',High:'bg-orange-100
-text-orange-700',Urgent:'bg-red-100 text-red-700'}
-return <span className={`px-2 py-0.5 rounded text-xs font-medium ${c[p]}`}>{p}</span>;
+
+/**
+ * Reusable Badge for Ticket Priority
+ */
+const PriorityBadge = ({ priority }) => {
+  const colors = {
+    Low: "bg-gray-100 text-gray-800",
+    Medium: "bg-blue-100 text-blue-800",
+    High: "bg-orange-100 text-orange-800",
+    Urgent: "bg-red-100 text-red-800",
+  };
+  return (
+    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${colors[priority] || colors.Low}`}>
+      {priority}
+    </span>
+  );
 };
-const StatusBadge = ({ s }) => {
-const c={Open:'bg-yellow-100 text-yellow-700','In Progress':'bg-blue-100
-text-blue-700',Resolved:'bg-green-100 text-green-700',Closed:'bg-gray-100'}
-return <span className={`px-2 py-0.5 rounded text-xs font-medium ${c[s]}`}>{s}</span>;
+
+/**
+ * Reusable Badge for Ticket Status
+ */
+const StatusBadge = ({ status }) => {
+  const colors = {
+    Open: "bg-yellow-100 text-yellow-800",
+    "In Progress": "bg-blue-100 text-blue-800",
+    Resolved: "bg-emerald-100 text-emerald-800",
+    Closed: "bg-gray-100 text-gray-800",
+  };
+  return (
+    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${colors[status] || colors.Open}`}>
+      {status}
+    </span>
+  );
 };
