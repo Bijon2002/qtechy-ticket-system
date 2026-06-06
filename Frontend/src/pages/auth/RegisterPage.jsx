@@ -46,8 +46,23 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-mesh w-full text-left py-12">
-      <div className="glass-panel p-10 rounded-3xl w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden py-12">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+      >
+        <source src="/sky.mp4" type="video/mp4" />
+      </video>
+
+      {/* Dim Overlay combined with existing mesh background */}
+      <div className="absolute inset-0 bg-mesh opacity-60 z-0 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-black/20 z-0 pointer-events-none"></div>
+
+      <div className="glass-panel p-10 rounded-3xl w-full max-w-sm relative z-10 text-left">
         <h1 className="text-3xl font-bold mb-8 text-center text-white tracking-tight">
           Create Account
         </h1>
@@ -97,7 +112,7 @@ export default function RegisterPage() {
               name="role"
               value={form.role}
               onChange={handleChange}
-              className="premium-input text-white"
+              className="premium-input text-slate-900"
             >
               <option value="user">User (Submit tickets)</option>
               <option value="agent">Agent (Handle tickets)</option>
@@ -113,11 +128,11 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+        <p className="mt-6 text-center text-sm text-slate-300 font-medium">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-yellow-500 font-semibold hover:text-yellow-400 transition-colors"
+            className="text-blue-600 font-bold hover:text-blue-700 transition-colors"
           >
             Sign In
           </Link>

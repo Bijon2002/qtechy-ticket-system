@@ -19,6 +19,7 @@ import TicketDetailPage from "./pages/tickets/TicketDetailPage";
 import EditTicketPage from "./pages/tickets/EditTicketPage";
 import CreateTicketPage from "./pages/tickets/CreateTicketPage";
 import UserManagementPage from "./pages/users/UserManagementPage";
+import SettingsPage from "./pages/settings/SettingsPage";
 
 // Route Guards and Layouts
 import PrivateRoute from "./components/PrivateRoute";
@@ -103,6 +104,7 @@ function App() {
             <Route path="tickets/create" element={<CreateTicketPage />} />
             <Route path="tickets/:id" element={<TicketDetailPage />} />
             <Route path="tickets/:id/edit" element={<EditTicketPage />} />
+            <Route path="settings" element={<SettingsPage />} />
 
             {/* Admin-Only Routes */}
             <Route

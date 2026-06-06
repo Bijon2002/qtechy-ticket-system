@@ -5,11 +5,33 @@
  */
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { loginAPI, registerAPI } from "../../api/authAPI";
+import { loginAPI, registerAPI, updateProfileAPI } from "../../api/authAPI";
 
 // Load initial state from local storage
 const user = JSON.parse(localStorage.getItem("user"));
 const token = localStorage.getItem("token");
+
+/**
+ * Async Thunk: Update user profile
+ */
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (data, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.token;
+      const res = await updateProfileAPI(data, token);
+      
+      // Update local storage with new user data
+      localStorage.setItem("user", JSON.stringify(res.data.data));
+      
+      return res.data.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(
+        err.response?.data?.message || "Failed to update profile"
+      );
+    }
+  }
+);
 
 /**
  * Async Thunk: Login a user
@@ -102,6 +124,20 @@ const authSlice = createSlice({
         state.token = action.payload.token;
       })
       .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      // Update Profile Cases
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

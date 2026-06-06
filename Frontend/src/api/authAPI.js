@@ -28,3 +28,13 @@ export const getMeAPI = (token) =>
   axios.get(`${BASE}/auth/me`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
+/**
+ * Update the currently authenticated user's profile
+ * @param {Object} data - Updated profile details
+ * @param {string} token - JWT authentication token
+ */
+export const updateProfileAPI = (data, token) =>
+  axios.put(`${BASE}/auth/profile`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });

@@ -37,8 +37,21 @@ const getMe = async (req, res) => {
   success(res, req.user, "Profile fetched");
 };
 
+/**
+ * Update current authenticated user profile
+ */
+const updateProfile = async (req, res, next) => {
+  try {
+    const updatedUser = await authService.updateUserProfile(req.user._id, req.body);
+    success(res, updatedUser, "Profile updated successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = { 
   register, 
   login, 
-  getMe 
+  getMe,
+  updateProfile
 };

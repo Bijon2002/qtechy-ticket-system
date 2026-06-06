@@ -13,15 +13,18 @@ const menuMap = {
     { label: "Dashboard", path: "/dashboard" },
     { label: "All Tickets", path: "/tickets" },
     { label: "User Management", path: "/users" },
+    { label: "Settings", path: "/settings" },
   ],
   agent: [
     { label: "Dashboard", path: "/dashboard" },
     { label: "Assigned Tickets", path: "/tickets" },
+    { label: "Settings", path: "/settings" },
   ],
   user: [
     { label: "Dashboard", path: "/dashboard" },
     { label: "My Tickets", path: "/tickets" },
     { label: "Create Ticket", path: "/tickets/create" },
+    { label: "Settings", path: "/settings" },
   ],
 };
 
@@ -35,11 +38,19 @@ export default function Sidebar({ onClose }) {
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 text-white flex flex-col h-full md:m-3 md:rounded-2xl md:h-[calc(100vh-24px)] shadow-2xl relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-yellow-600/10 to-transparent"></div>
+      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-600/10 to-transparent"></div>
 
-      <div className="p-6 relative z-10">
-        <h2 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-yellow-200 tracking-tight">QTechy</h2>
-        <p className="text-xs text-slate-400 uppercase tracking-widest mt-1 font-semibold">{user?.role} Portal</p>
+      <div className="p-6 relative z-10 flex items-center gap-2">
+        <div className="bg-white text-blue-600 rounded p-1">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+          </svg>
+        </div>
+        <div>
+          <h2 className="text-2xl font-black text-white tracking-tight leading-none">QTechy</h2>
+          <p className="text-[10px] text-blue-400 uppercase tracking-widest mt-1 font-bold">{user?.role} Portal</p>
+        </div>
       </div>
 
       <nav className="flex-1 space-y-2 px-4 relative z-10 mt-4">
@@ -49,9 +60,9 @@ export default function Sidebar({ onClose }) {
             to={m.path}
             onClick={onClose}
             className={({ isActive }) =>
-              `block px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
-                ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 shadow-inner"
-                : "text-slate-300 hover:bg-slate-800 hover:text-white"
+              `block px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${isActive
+                ? "bg-blue-600 text-white shadow-md shadow-blue-900/20"
+                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
               }`
             }
           >
@@ -62,8 +73,12 @@ export default function Sidebar({ onClose }) {
 
       <div className="p-4 relative z-10 border-t border-slate-800">
         <div className="flex items-center gap-3 px-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-600 to-yellow-400 flex items-center justify-center font-bold text-slate-950 shadow-lg shrink-0">
-            {user?.name?.charAt(0).toUpperCase() || "U"}
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center font-bold text-white shadow-lg shrink-0 overflow-hidden">
+            {user?.avatar ? (
+              <img src={user.avatar} className="w-full h-full object-cover" alt="avatar" />
+            ) : (
+              user?.name?.charAt(0).toUpperCase() || "U"
+            )}
           </div>
           <div className="overflow-hidden">
             <p className="text-sm font-medium text-white truncate">{user?.name}</p>

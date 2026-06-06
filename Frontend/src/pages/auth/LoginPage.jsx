@@ -44,8 +44,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-mesh">
-      <div className="glass-panel p-10 rounded-3xl w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover z-0"
+      >
+        <source src="/sky.mp4" type="video/mp4" />
+      </video>
+
+      {/* Dim Overlay combined with existing mesh background */}
+      <div className="absolute inset-0 bg-mesh opacity-60 z-0 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-black/20 z-0 pointer-events-none"></div>
+
+      <div className="glass-panel p-10 rounded-3xl w-full max-w-sm relative z-10">
         <h1 className="text-3xl font-bold mb-8 text-center text-white tracking-tight">Welcome Back</h1>
 
         {/* Display Error Message */}
@@ -81,9 +96,9 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+        <p className="mt-6 text-center text-sm text-slate-300 font-medium">
           No account?{" "}
-          <Link to="/register" className="text-yellow-500 font-semibold hover:text-yellow-400 transition-colors">
+          <Link to="/register" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">
             Create one
           </Link>
         </p>

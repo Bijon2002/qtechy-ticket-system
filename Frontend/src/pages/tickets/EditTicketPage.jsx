@@ -54,32 +54,32 @@ export default function EditTicketPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto p-8 bg-slate-900 rounded-2xl shadow-sm border border-slate-800 mt-6">
-      <h1 className="text-2xl font-bold mb-6 text-white tracking-tight">Edit Ticket</h1>
+    <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-sm border border-slate-200 mt-6 animate-in fade-in duration-500">
+      <h1 className="text-2xl font-extrabold mb-6 text-slate-900 tracking-tight">Edit Ticket</h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title Field */}
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
             Title
           </label>
           <input
             value={form.title}
             onChange={(e) => setForm({ ...form, title: e.target.value })}
-            className="premium-input"
+            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-400 shadow-sm"
             required
           />
         </div>
 
         {/* Description Field */}
         <div>
-          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-2">
             Description
           </label>
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="premium-input"
+            className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all placeholder:text-slate-400 shadow-sm"
             rows={4}
             required
           />
@@ -88,13 +88,13 @@ export default function EditTicketPage() {
         {/* Category, Priority, and Status Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-400 tracking-wide mb-2">
+            <label className="block text-xs font-bold uppercase text-slate-700 tracking-wide mb-2">
               Category
             </label>
             <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="premium-input bg-slate-900"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
             >
               {[
                 "Bug",
@@ -112,13 +112,13 @@ export default function EditTicketPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-400 tracking-wide mb-2">
+            <label className="block text-xs font-bold uppercase text-slate-700 tracking-wide mb-2">
               Priority
             </label>
             <select
               value={form.priority}
               onChange={(e) => setForm({ ...form, priority: e.target.value })}
-              className="premium-input bg-slate-900"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
             >
               {["Low", "Medium", "High", "Urgent"].map((p) => (
                 <option key={p} value={p}>
@@ -129,13 +129,13 @@ export default function EditTicketPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase text-slate-400 tracking-wide mb-2">
+            <label className="block text-xs font-bold uppercase text-slate-700 tracking-wide mb-2">
               Status
             </label>
             <select
               value={form.status}
               onChange={(e) => setForm({ ...form, status: e.target.value })}
-              className="premium-input bg-slate-900"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
             >
               {["Open", "In Progress", "Resolved", "Closed"].map((s) => (
                 <option key={s} value={s}>
@@ -147,13 +147,13 @@ export default function EditTicketPage() {
 
           {user?.role === "admin" && (
             <div>
-              <label className="block text-xs font-bold uppercase text-slate-400 tracking-wide mb-2">
+              <label className="block text-xs font-bold uppercase text-slate-700 tracking-wide mb-2">
                 Assign To
               </label>
               <select
                 value={form.assignedTo}
                 onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
-                className="premium-input bg-slate-900"
+                className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all shadow-sm"
               >
                 <option value="">-- Unassigned --</option>
                 {agents.map((agent) => (
@@ -167,17 +167,17 @@ export default function EditTicketPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 pt-6 mt-2 border-t border-slate-800">
+        <div className="flex gap-4 pt-6 mt-2 border-t border-slate-200">
           <button
             type="submit"
-            className="btn-primary flex-1"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-lg transition-colors shadow-sm disabled:opacity-50 flex-1"
           >
             Save Changes
           </button>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="btn-secondary flex-1"
+            className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold px-6 py-3 rounded-lg border border-slate-200 transition-colors shadow-sm flex-1"
           >
             Cancel
           </button>

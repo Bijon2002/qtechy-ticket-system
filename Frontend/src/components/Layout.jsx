@@ -13,11 +13,19 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-full bg-slate-950 text-left overflow-hidden flex-col md:flex-row relative">
+    <div className="flex h-screen w-full bg-slate-50 text-left overflow-hidden flex-col md:flex-row relative">
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-slate-900 border-b border-slate-800 z-20">
-        <h2 className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-yellow-200 tracking-tight">QTechy QTS</h2>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-slate-300 p-2 focus:outline-none">
+      <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200 z-20 shadow-sm">
+        <div className="flex items-center gap-2">
+           <div className="bg-blue-600 text-white rounded p-1">
+             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+               <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+               <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+             </svg>
+           </div>
+           <h2 className="text-xl font-black text-slate-900 tracking-tight">QTechy</h2>
+        </div>
+        <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-slate-600 p-2 focus:outline-none hover:bg-slate-100 rounded-lg">
           {sidebarOpen ? <HiX size={24} /> : <HiMenu size={24} />}
         </button>
       </div>

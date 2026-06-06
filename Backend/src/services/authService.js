@@ -69,7 +69,32 @@ const loginUser = async ({ email, password }) => {
   };
 };
 
+/**
+ * Update user profile
+ */
+const updateUserProfile = async (userId, updates) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  
+  if (updates.name) user.name = updates.name;
+  if (updates.email) user.email = updates.email;
+  if (updates.avatar !== undefined) user.avatar = updates.avatar;
+
+  await user.save();
+  
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    avatar: user.avatar,
+  };
+};
+
 module.exports = { 
   registerUser, 
-  loginUser 
+  loginUser,
+  updateUserProfile
 };
