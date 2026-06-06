@@ -110,13 +110,12 @@ const ticketSchema = new mongoose.Schema(
  * Automatically generates a human-readable, auto-incrementing ticket number 
  * (e.g., TKT-0001, TKT-0002) before saving a new ticket.
  */
-ticketSchema.pre("save", async function (next) {
+ticketSchema.pre("save", async function () {
   if (this.isNew) {
     const count = await this.constructor.countDocuments();
     // Start counting from 1 and pad with zeros to ensure a consistent format
     this.ticketNumber = `TKT-${String(count + 1).padStart(4, "0")}`;
   }
-  next();
 });
 
 module.exports = mongoose.model("Ticket", ticketSchema);

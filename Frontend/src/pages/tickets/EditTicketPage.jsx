@@ -7,21 +7,35 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { updateTicketAPI, fetchTicketAPI } from "../../api/ticketAPI";
+import { fetchUsersAPI } from "../../api/userAPI";
 
 export default function EditTicketPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  // Extract auth token
-  const token = useSelector((state) => state.auth.token);
+  // Extract auth token and user
+  const { token, user } = useSelector((state) => state.auth);
   
   // Local form state for the ticket being edited
   const [form, setForm] = useState(null);
+  const [agents, setAgents] = useState([]);
   
   // Fetch ticket details on component mount
   useEffect(() => {
-    fetchTicketAPI(token, id).then((res) => setForm(res.data.data));
-  }, [id, token]);
+    fetchTicketAPI(token, id).then((res) => {
+      const ticket = res.data.data;
+      setForm({
+        ...ticket,
+        assignedTo: ticket.assignedTo?._id || ticket.assignedTo || "",
+      });
+    });
+
+    if (user?.role === "admin") {
+      fetchUsersAPI(token, { role: "agent", limit: 100 }).then((res) => {
+        setAgents(res.data.data.users || []);
+      });
+    }
+  }, [id, token, user]);
   
   /**
    * Handle form submission for updating the ticket
@@ -130,6 +144,26 @@ export default function EditTicketPage() {
               ))}
             </select>
           </div>
+          
+          {user?.role === "admin" && (
+            <div>
+              <label className="block text-xs font-semibold uppercase text-gray-500 mb-1">
+                Assign To
+              </label>
+              <select
+                value={form.assignedTo}
+                onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
+                className="w-full border rounded px-3 py-2 bg-white focus:outline-none focus:border-blue-500"
+              >
+                <option value="">-- Unassigned --</option>
+                {agents.map((agent) => (
+                  <option key={agent._id} value={agent._id}>
+                    {agent.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
         
         {/* Action Buttons */}

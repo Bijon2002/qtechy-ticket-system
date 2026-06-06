@@ -153,17 +153,20 @@ export default function TicketListPage() {
                         View
                       </button>
                       
+                      {/* Admin and Agent actions */}
+                      {(user?.role === "admin" || user?.role === "agent") && (
+                        <button
+                          onClick={() => navigate(`/tickets/${ticket._id}/edit`)}
+                          className="text-emerald-600 hover:text-emerald-900 mr-3 transition-colors"
+                        >
+                          Edit
+                        </button>
+                      )}
+                      
                       {/* Admin-only actions */}
                       {user?.role === "admin" && (
-                        <>
-                          <button
-                            onClick={() => navigate(`/tickets/${ticket._id}/edit`)}
-                            className="text-emerald-600 hover:text-emerald-900 mr-3 transition-colors"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => {
+                        <button
+                          onClick={() => {
                               if(window.confirm("Are you sure you want to delete this ticket?")) {
                                 dispatch(deleteTicket(ticket._id));
                               }
@@ -172,7 +175,6 @@ export default function TicketListPage() {
                           >
                             Delete
                           </button>
-                        </>
                       )}
                     </td>
                   </tr>
