@@ -38,11 +38,11 @@ export default function CreateTicketPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    
+
     try {
       // Dispatch the async thunk to create a ticket
       const res = await dispatch(createTicket(form));
-      
+
       // On success, redirect to the ticket list
       if (createTicket.fulfilled.match(res)) {
         navigate("/tickets");
@@ -58,18 +58,18 @@ export default function CreateTicketPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow mt-6 text-left">
-      <h1 className="text-xl font-bold mb-4 text-gray-800">
+    <div className="max-w-xl mx-auto p-8 bg-slate-900 rounded-2xl shadow-sm border border-slate-800 mt-6 text-left">
+      <h1 className="text-2xl font-bold mb-6 text-white tracking-tight">
         Create New Ticket
       </h1>
-      
+
       {/* Display Error Message */}
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
+
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title Field */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
             Title
           </label>
           <input
@@ -77,14 +77,14 @@ export default function CreateTicketPage() {
             value={form.title}
             onChange={handleChange}
             placeholder="Short summary of the issue"
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+            className="premium-input"
             required
           />
         </div>
 
         {/* Description Field */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
+          <label className="block text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">
             Description
           </label>
           <textarea
@@ -92,23 +92,23 @@ export default function CreateTicketPage() {
             value={form.description}
             onChange={handleChange}
             placeholder="Describe your issue in detail"
-            className="w-full border rounded px-3 py-2 focus:outline-none focus:border-blue-500"
+            className="premium-input"
             rows={5}
             required
           />
         </div>
 
         {/* Category & Priority Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-xs font-semibold uppercase text-gray-500 mb-1">
+            <label className="block text-xs font-bold uppercase text-slate-400 tracking-wide mb-2">
               Category
             </label>
             <select
               name="category"
               value={form.category}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2 bg-white focus:outline-none focus:border-blue-500"
+              className="premium-input bg-slate-900"
             >
               {[
                 "Bug",
@@ -126,14 +126,14 @@ export default function CreateTicketPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-gray-500 mb-1">
+            <label className="block text-xs font-bold uppercase text-slate-400 tracking-wide mb-2">
               Priority
             </label>
             <select
               name="priority"
               value={form.priority}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2 bg-white focus:outline-none focus:border-blue-500"
+              className="premium-input bg-slate-900"
             >
               {["Low", "Medium", "High", "Urgent"].map((p) => (
                 <option key={p} value={p}>
@@ -145,19 +145,19 @@ export default function CreateTicketPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-4 pt-6 mt-2 border-t border-slate-800">
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+            className="btn-primary flex-1"
           >
             {loading ? "Creating..." : "Submit Ticket"}
           </button>
-          
+
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="bg-gray-100 border text-gray-700 px-6 py-2 rounded hover:bg-gray-200 transition-colors font-medium"
+            className="btn-secondary flex-1"
           >
             Cancel
           </button>
