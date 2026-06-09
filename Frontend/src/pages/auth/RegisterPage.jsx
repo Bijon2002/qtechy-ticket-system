@@ -26,6 +26,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user",
   });
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -38,7 +39,8 @@ export default function RegisterPage() {
     dispatch(registerUser({
       name: form.name,
       email: form.email,
-      password: form.password
+      password: form.password,
+      role: form.role
     }));
   };
 
@@ -134,6 +136,20 @@ export default function RegisterPage() {
                 required
                 minLength={6}
               />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-widest mb-1.5 ml-1 drop-shadow">Role</label>
+              <select
+                name="role"
+                value={form.role}
+                onChange={handleChange}
+                className="premium-input bg-white/5 border-white/10 text-white focus:bg-white/10 w-full [&>option]:bg-slate-800"
+                required
+              >
+                <option value="user">User</option>
+                <option value="agent">Agent</option>
+              </select>
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full mt-6 flex items-center justify-center gap-2 shadow-blue-900/50">

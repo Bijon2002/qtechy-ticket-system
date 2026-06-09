@@ -90,13 +90,11 @@ export default function TicketDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Ticket Header Card */}
-          <div className="app-card overflow-hidden">
-            {/* Top color bar indicating status */}
-            <div className={`h-1.5 w-full ${
-              ticket.status === 'Open' ? 'bg-red-500' :
-              ticket.status === 'In Progress' ? 'bg-indigo-500' :
-              ticket.status === 'Resolved' ? 'bg-emerald-500' : 'bg-slate-400'
-            }`} />
+          <div className={`app-card overflow-hidden border-t-[6px] ${
+            ticket.status === 'Open' ? 'border-t-red-500' :
+            ticket.status === 'In Progress' ? 'border-t-indigo-500' :
+            ticket.status === 'Resolved' ? 'border-t-emerald-500' : 'border-t-slate-400'
+          }`}>
             
             <div className="p-6 md:p-8">
               <div className="flex items-center gap-3 mb-4">
@@ -142,7 +140,7 @@ export default function TicketDetailPage() {
           </div>
 
           {/* Comments Section */}
-          <div className="app-card overflow-hidden flex flex-col h-[600px]">
+          <div className="app-card overflow-hidden flex flex-col min-h-[400px] max-h-[600px]">
             <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
