@@ -1,23 +1,39 @@
 /**
- * Ticket List Page
+ * Ticket List Page - Premium UI
  * Displays a paginated, filterable, and sortable list of tickets.
  */
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchTickets, deleteTicket } from "../../features/tickets/ticketSlice";
+import { fetchTickets, deleteTicket, updateTicket } from "../../features/tickets/ticketSlice";
+import { fetchUsers } from "../../features/users/userSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import CreateTicketModal from "../../components/CreateTicketModal";
+
+const priorityConfig = {
+  Low:    { bg: "bg-slate-100 text-slate-600", dot: "bg-slate-400" },
+  Medium: { bg: "bg-blue-50 text-blue-700", dot: "bg-blue-500" },
+  High:   { bg: "bg-orange-50 text-orange-700", dot: "bg-orange-500" },
+  Urgent: { bg: "bg-red-50 text-red-700", dot: "bg-red-500" },
+};
+
+const statusConfig = {
+  Open:         { bg: "bg-red-50 text-red-700 border border-red-200", dot: "bg-red-500" },
+  "In Progress":{ bg: "bg-indigo-50 text-indigo-700 border border-indigo-200", dot: "bg-indigo-500" },
+  Resolved:     { bg: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-500" },
+  Closed:       { bg: "bg-slate-100 text-slate-500 border border-slate-200", dot: "bg-slate-400" },
+};
 
 export default function TicketListPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Extract state from Redux store
   const { list, total, pages, loading } = useSelector((state) => state.tickets);
   const { user } = useSelector((state) => state.auth);
+  const { list: agents } = useSelector((state) => state.users);
 
-  // Local state for pagination, search, and filtering
   const [params, setParams] = useState({
     page: 1,
     limit: 10,
@@ -27,63 +43,77 @@ export default function TicketListPage() {
     sort: "-createdAt",
   });
 
-  // State for delete confirmation modal
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Fetch tickets whenever params change
   useEffect(() => {
     dispatch(fetchTickets(params));
   }, [params, dispatch]);
 
-  /**
-   * Handle search input change (resets to page 1)
-   */
+  useEffect(() => {
+    if (user?.role === "admin") {
+      dispatch(fetchUsers({ limit: 100 }));
+    }
+  }, [user, dispatch]);
+
   const handleSearch = (e) => {
     setParams((p) => ({ ...p, search: e.target.value, page: 1 }));
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Tickets</h1>
+    <div className="p-6 md:p-8 space-y-6 fade-in-up">
 
-        {/* Only Admin and User roles can create tickets */}
+      {/* Page Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Tickets</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{total} total tickets in the system</p>
+        </div>
         {(user?.role === "admin" || user?.role === "user") && (
           <button
-            onClick={() => navigate("/tickets/create")}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg transition-colors shadow-sm"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 shadow-md shadow-blue-200 hover:shadow-lg hover:shadow-blue-200 hover:-translate-y-0.5 text-sm"
           >
-            + New Ticket
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            New Ticket
           </button>
         )}
       </div>
 
-      {/* Search & Filters Section */}
-      <div className="flex gap-4 mb-6 flex-wrap bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-        <input
-          placeholder="Search tickets..."
-          value={params.search}
-          onChange={handleSearch}
-          className="border border-slate-300 bg-white text-slate-900 rounded-lg px-4 py-2 flex-1 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-slate-400"
-        />
+      {/* Search & Filters */}
+      <div className="app-card p-4 flex flex-wrap gap-3 items-center">
+        {/* Search */}
+        <div className="flex-1 min-w-[220px] relative">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            placeholder="Search by title or ticket number..."
+            value={params.search}
+            onChange={handleSearch}
+            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 text-slate-900 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all placeholder-slate-400"
+          />
+        </div>
+
+        {/* Status Filter */}
         <select
           value={params.status}
-          onChange={(e) =>
-            setParams((p) => ({ ...p, status: e.target.value, page: 1 }))
-          }
-          className="border border-slate-300 bg-white text-slate-900 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] transition-all"
+          onChange={(e) => setParams((p) => ({ ...p, status: e.target.value, page: 1 }))}
+          className="border border-slate-200 bg-slate-50 text-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all font-medium min-w-[140px]"
         >
           <option value="">All Statuses</option>
           {["Open", "In Progress", "Resolved", "Closed"].map((s) => (
             <option key={s} value={s}>{s}</option>
           ))}
         </select>
+
+        {/* Priority Filter */}
         <select
           value={params.priority}
-          onChange={(e) =>
-            setParams((p) => ({ ...p, priority: e.target.value, page: 1 }))
-          }
-          className="border border-slate-300 bg-white text-slate-900 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[150px] transition-all"
+          onChange={(e) => setParams((p) => ({ ...p, priority: e.target.value, page: 1 }))}
+          className="border border-slate-200 bg-slate-50 text-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all font-medium min-w-[140px]"
         >
           <option value="">All Priorities</option>
           {["Low", "Medium", "High", "Urgent"].map((p) => (
@@ -92,90 +122,161 @@ export default function TicketListPage() {
         </select>
       </div>
 
-      {/* Data Table */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200">
+      {/* Table Card */}
+      <div className="app-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-xs border-b border-slate-200">
-              <tr>
-                {[
-                  "#",
-                  "Title",
-                  "Category",
-                  "Priority",
-                  "Status",
-                  "Created",
-                  "Actions",
-                ].map((header) => (
-                  <th key={header} className="px-5 py-4 font-bold tracking-wider">
-                    {header}
-                  </th>
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/70">
+                {["#", "Title", "Category", "Priority", "Status", "Assigned To", "Created", "Actions"].map((h) => (
+                  <th key={h} className="px-3 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody>
               {loading ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-10 text-slate-500">
-                    Loading tickets...
-                  </td>
-                </tr>
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} className="border-b border-slate-50">
+                    {[...Array(8)].map((_, j) => (
+                      <td key={j} className="px-3 py-3">
+                        <div className="h-4 rounded shimmer" style={{ width: `${60 + (j * 7) % 30}%` }} />
+                      </td>
+                    ))}
+                  </tr>
+                ))
               ) : list.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-10 text-slate-500">
-                    No tickets found matching your criteria.
+                  <td colSpan={8} className="text-center py-16">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                      <p className="text-slate-400 font-medium text-sm">No tickets found</p>
+                      <p className="text-slate-400 text-xs">Try changing your search or filters</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
-                list.map((ticket) => (
-                  <tr key={ticket._id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-4 font-mono text-xs font-bold text-blue-700 bg-blue-50 rounded-l-lg border-y border-transparent">
-                      {ticket.ticketNumber}
+                list.map((ticket, idx) => (
+                  <tr
+                    key={ticket._id}
+                    className="border-b border-slate-50 hover:bg-blue-50/30 transition-colors group"
+                    style={{ animationDelay: `${idx * 30}ms` }}
+                  >
+                    {/* Ticket # */}
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className="font-mono text-[11px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md border border-blue-100">
+                        {ticket.ticketNumber}
+                      </span>
                     </td>
-                    <td className="px-5 py-4 font-bold text-slate-900">
-                      {ticket.title}
-                    </td>
-                    <td className="px-5 py-4 text-slate-500 text-sm">
-                      {ticket.category}
-                    </td>
-                    <td className="px-5 py-4">
-                      <PriorityBadge priority={ticket.priority} />
-                    </td>
-                    <td className="px-5 py-4">
-                      <StatusBadge status={ticket.status} />
-                    </td>
-                    <td className="px-5 py-4 text-xs text-slate-500 font-medium">
-                      {new Date(ticket.createdAt).toLocaleDateString(undefined, {
-                        year: 'numeric', month: 'short', day: 'numeric'
-                      })}
-                    </td>
-                    <td className="px-5 py-4 whitespace-nowrap text-sm font-bold">
-                      <button
+
+                    {/* Title */}
+                    <td className="px-3 py-3 max-w-[140px]">
+                      <button 
                         onClick={() => navigate(`/tickets/${ticket._id}`)}
-                        className="text-blue-600 hover:text-blue-800 mr-3 transition-colors"
+                        className="text-xs font-semibold text-slate-900 truncate hover:text-blue-600 transition-colors text-left w-full hover:underline" 
+                        title={ticket.title}
                       >
-                        View
+                        {ticket.title}
                       </button>
+                    </td>
 
-                      {/* Admin and Agent actions */}
-                      {(user?.role === "admin" || user?.role === "agent") && (
-                        <button
-                          onClick={() => navigate(`/tickets/${ticket._id}/edit`)}
-                          className="text-emerald-600 hover:text-emerald-700 mr-3 transition-colors"
-                        >
-                          Edit
-                        </button>
-                      )}
+                    {/* Category */}
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className="text-slate-500 text-[11px] font-medium">{ticket.category}</span>
+                    </td>
 
-                      {/* Admin-only actions */}
-                      {user?.role === "admin" && (
-                        <button
-                          onClick={() => setDeleteConfirmId(ticket._id)}
-                          className="text-red-600 hover:text-red-700 transition-colors ml-1"
+                    {/* Priority */}
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${priorityConfig[ticket.priority]?.bg || "bg-slate-100 text-slate-600"}`}>
+                        <span className={`w-1 h-1 rounded-full ${priorityConfig[ticket.priority]?.dot || "bg-slate-400"}`} />
+                        {ticket.priority}
+                      </span>
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${statusConfig[ticket.status]?.bg || "bg-slate-100 text-slate-600 border border-slate-200"}`}>
+                        <span className={`w-1 h-1 rounded-full ${statusConfig[ticket.status]?.dot || "bg-slate-400"}`} />
+                        {ticket.status}
+                      </span>
+                    </td>
+
+                    {/* Assigned To */}
+                    <td className="px-3 py-3 min-w-[140px]">
+                      {ticket.assignedTo ? (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center font-bold text-white text-[10px] overflow-hidden shrink-0 ring-1 ring-white">
+                            {ticket.assignedTo.avatar ? (
+                              <img src={ticket.assignedTo.avatar} alt="avatar" className="w-full h-full object-cover" />
+                            ) : (
+                              ticket.assignedTo.name.charAt(0).toUpperCase()
+                            )}
+                          </div>
+                          <span className="text-[11px] font-semibold text-slate-700 truncate max-w-[80px]" title={ticket.assignedTo.name}>
+                            {ticket.assignedTo.name}
+                          </span>
+                        </div>
+                      ) : user?.role === "admin" ? (
+                        <select
+                          onChange={(e) => {
+                            dispatch(updateTicket({ id: ticket._id, data: { assignedTo: e.target.value } }));
+                            toast.success("Ticket assigned!");
+                          }}
+                          defaultValue=""
+                          className="text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400 cursor-pointer transition-colors w-full"
                         >
-                          Delete
-                        </button>
+                          <option value="" disabled>+ Assign</option>
+                          {agents.filter(a => a.role !== "user").map((a) => (
+                            <option key={a._id} value={a._id}>{a.name}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className="text-[10px] font-medium text-slate-400 italic">Unassigned</span>
                       )}
+                    </td>
+
+                    {/* Created */}
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        {new Date(ticket.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                      </span>
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-3 py-3">
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          onClick={() => navigate(`/tickets/${ticket._id}`)}
+                          className="px-2 py-1.5 text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 rounded-md transition-colors border border-blue-100"
+                        >
+                          View
+                        </button>
+                        {(user?.role === "admin" || user?.role === "agent") && (
+                          <button
+                            onClick={() => navigate(`/tickets/${ticket._id}/edit`)}
+                            title="Edit ticket"
+                            className="p-1 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        )}
+                        {user?.role === "admin" && (
+                          <button
+                            onClick={() => setDeleteConfirmId(ticket._id)}
+                            title="Delete ticket"
+                            className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -183,103 +284,78 @@ export default function TicketListPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {!loading && list.length > 0 && (
+          <div className="flex justify-between items-center px-5 py-3.5 border-t border-slate-100 bg-slate-50/50">
+            <p className="text-xs text-slate-500">
+              Showing <span className="font-bold text-slate-700">{list.length}</span> of <span className="font-bold text-slate-700">{total}</span> tickets
+            </p>
+            <div className="flex gap-2 items-center">
+              <button
+                disabled={params.page <= 1}
+                onClick={() => setParams((p) => ({ ...p, page: p.page - 1 }))}
+                className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors text-xs font-semibold text-slate-700"
+              >
+                ← Previous
+              </button>
+              <span className="px-3 py-1.5 text-xs text-slate-500 font-medium bg-white border border-slate-200 rounded-lg">
+                {params.page} / {pages || 1}
+              </span>
+              <button
+                disabled={params.page >= pages}
+                onClick={() => setParams((p) => ({ ...p, page: p.page + 1 }))}
+                className="px-3 py-1.5 border border-slate-200 bg-white rounded-lg disabled:opacity-40 hover:bg-slate-50 transition-colors text-xs font-semibold text-slate-700"
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Pagination Controls */}
-      {!loading && list.length > 0 && (
-        <div className="flex justify-between items-center mt-6">
-          <p className="text-sm text-slate-500">
-            Showing <span className="font-bold text-slate-900">{list.length}</span> of <span className="font-bold text-slate-900">{total}</span> tickets
-          </p>
-          <div className="flex gap-2 items-center">
-            <button
-              disabled={params.page <= 1}
-              onClick={() => setParams((p) => ({ ...p, page: p.page - 1 }))}
-              className="px-4 py-2 border border-slate-300 bg-white rounded-md disabled:opacity-50 hover:bg-slate-50 transition-colors text-sm font-bold text-slate-700"
-            >
-              Previous
-            </button>
-            <span className="px-4 py-2 text-sm text-slate-500 font-medium">
-              Page {params.page} of {pages || 1}
-            </span>
-            <button
-              disabled={params.page >= pages}
-              onClick={() => setParams((p) => ({ ...p, page: p.page + 1 }))}
-              className="px-4 py-2 border border-slate-300 bg-white rounded-md disabled:opacity-50 hover:bg-slate-50 transition-colors text-sm font-bold text-slate-700"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Delete Confirmation Modal */}
-      {deleteConfirmId && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-2xl max-w-sm w-full animate-in zoom-in-95 duration-200">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3 text-red-600 bg-red-50 p-3 rounded-xl w-fit">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      {deleteConfirmId && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-2xl max-w-sm w-full fade-in-up">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-xl tracking-tight mb-1">Delete Ticket?</h3>
-                <p className="text-slate-500 text-sm">Are you sure you want to delete this ticket? This action cannot be undone and will permanently remove it from the system.</p>
-              </div>
-              <div className="flex justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
-                <button
-                  className="px-4 py-2 text-sm font-bold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors w-full sm:w-auto"
-                  onClick={() => setDeleteConfirmId(null)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="px-4 py-2 text-sm font-bold bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm w-full sm:w-auto"
-                  onClick={() => {
-                    dispatch(deleteTicket(deleteConfirmId));
-                    setDeleteConfirmId(null);
-                    toast.success("Ticket deleted successfully");
-                  }}
-                >
-                  Delete
-                </button>
+                <h3 className="font-bold text-slate-900 text-base">Delete this ticket?</h3>
+                <p className="text-slate-500 text-xs mt-0.5">This action is permanent and cannot be undone.</p>
               </div>
             </div>
+            <div className="flex gap-2 mt-5">
+              <button
+                className="flex-1 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                onClick={() => setDeleteConfirmId(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="flex-1 px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors shadow-sm shadow-red-200"
+                onClick={() => {
+                  dispatch(deleteTicket(deleteConfirmId));
+                  setDeleteConfirmId(null);
+                  toast.success("Ticket deleted");
+                }}
+              >
+                Delete
+              </button>
+            </div>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Create Ticket Modal */}
+      {isCreateModalOpen && (
+        <CreateTicketModal onClose={() => setIsCreateModalOpen(false)} />
       )}
     </div>
   );
 }
-
-const PriorityBadge = ({ priority }) => {
-  const colors = {
-    Low: "bg-slate-100 text-slate-600 border border-slate-200",
-    Medium: "bg-blue-50 text-blue-700 border border-blue-200",
-    High: "bg-orange-50 text-orange-700 border border-orange-200",
-    Urgent: "bg-red-50 text-red-700 border border-red-200",
-  };
-  return (
-    <span className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase ${colors[priority] || colors.Low}`}>
-      {priority}
-    </span>
-  );
-};
-
-/**
- * Reusable Badge for Ticket Status
- */
-const StatusBadge = ({ status }) => {
-  const colors = {
-    Open: "bg-red-50 text-red-700 border border-red-200",
-    "In Progress": "bg-indigo-50 text-indigo-700 border border-indigo-200",
-    Resolved: "bg-emerald-50 text-emerald-700 border border-emerald-200",
-    Closed: "bg-slate-100 text-slate-500 border border-slate-200",
-  };
-  return (
-    <span className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-wider uppercase ${colors[status] || colors.Open}`}>
-      {status}
-    </span>
-  );
-};

@@ -1,19 +1,21 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
   body {
-    @apply bg-slate-950 text-gray-100 antialiased min-h-screen;
-    background-color: #020617;
-    /* Slate 950 */
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-[#f0f4f8] text-slate-900 antialiased min-h-screen;
   }
 }
 
 @layer utilities {
 
-  /* A beautiful, vibrant, translucent mesh gradient for the authentication pages */
+  /* Auth background mesh */
   .bg-mesh {
     background-color: #020617;
-    /* Very dark blue/black */
     background-image:
       radial-gradient(at 20% 20%, hsla(217, 100%, 15%, 1) 0px, transparent 50%),
       radial-gradient(at 80% 0%, hsla(43, 100%, 15%, 1) 0px, transparent 50%),
@@ -21,26 +23,49 @@
       radial-gradient(at 80% 100%, hsla(45, 100%, 20%, 0.8) 0px, transparent 50%);
   }
 
-  /* Frosted glass effects */
+  /* Frosted glass for auth */
   .glass-panel {
-    @apply bg-slate-900/60 backdrop-blur-xl border border-slate-800 shadow-2xl shadow-black/50;
+    @apply bg-slate-900/70 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/50;
   }
-
   .glass-card {
     @apply bg-slate-800/80 backdrop-blur-lg border border-slate-700 shadow-lg shadow-black/40;
   }
 
-  /* Modern Input styles */
+  /* Premium auth inputs */
   .premium-input {
-    @apply w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-yellow-600/50 focus:border-yellow-600 transition-all duration-300 text-sm text-white placeholder-slate-500;
+    @apply w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 text-sm text-white placeholder-slate-500;
   }
 
-  /* Modern Button styles */
+  /* Auth button */
   .btn-primary {
-    @apply bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-slate-950 font-bold rounded-xl px-4 py-3 shadow-lg shadow-yellow-600/20 transform transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-yellow-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+    @apply bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold rounded-xl px-4 py-3 shadow-lg shadow-blue-600/25 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+  }
+  .btn-secondary {
+    @apply bg-slate-800 border border-slate-700 text-gray-200 font-medium rounded-xl px-4 py-3 shadow-sm hover:bg-slate-700 transition-all duration-300;
   }
 
-  .btn-secondary {
-    @apply bg-slate-800 border border-slate-700 text-gray-200 font-medium rounded-xl px-4 py-3 shadow-sm hover:bg-slate-700 transition-all duration-300 hover:shadow-md hover:border-slate-600;
+  /* App-level card */
+  .app-card {
+    @apply bg-white rounded-2xl border border-slate-200/80 shadow-sm;
+  }
+
+  /* Shimmer loading effect */
+  .shimmer {
+    background: linear-gradient(90deg, #f0f4f8 25%, #e8eef5 50%, #f0f4f8 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Fade in up animation */
+  .fade-in-up {
+    animation: fadeInUp 0.4s ease forwards;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }

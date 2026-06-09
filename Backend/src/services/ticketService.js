@@ -8,9 +8,9 @@ const Ticket = require("../models/Ticket");
 
 // Common population options to fetch related user data instead of just ObjectIds
 const POPULATE = [
-  { path: "createdBy", select: "name email" },
-  { path: "assignedTo", select: "name email" },
-  { path: "comments.user", select: "name" },
+  { path: "createdBy", select: "name email avatar" },
+  { path: "assignedTo", select: "name email avatar" },
+  { path: "comments.user", select: "name avatar" },
   { path: "statusHistory.changedBy", select: "name" },
 ];
 

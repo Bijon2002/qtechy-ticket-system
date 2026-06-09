@@ -35,4 +35,16 @@ router.put("/:id/role", async (req, res, next) => {
   }
 });
 
+/**
+ * Delete a user
+ */
+router.delete("/:id", async (req, res, next) => {
+  try {
+    await userService.deleteUser(req.params.id);
+    success(res, null, "User deleted successfully");
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;

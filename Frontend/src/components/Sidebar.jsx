@@ -1,5 +1,5 @@
 /**
- * Sidebar Component
+ * Sidebar Component - Clean Light Sidebar
  * Displays navigation links dynamically based on the user's role.
  */
 
@@ -7,7 +7,46 @@ import { useSelector, useDispatch } from "react-redux";
 import { NavLink } from "react-router-dom";
 import { logout } from "../features/auth/authSlice";
 
-// Navigation menu configurations per role
+// Icon map using inline SVGs per menu item
+const iconMap = {
+  Dashboard: (
+    <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    </svg>
+  ),
+  "All Tickets": (
+    <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+    </svg>
+  ),
+  "Assigned Tickets": (
+    <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+    </svg>
+  ),
+  "My Tickets": (
+    <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+    </svg>
+  ),
+  "Create Ticket": (
+    <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  ),
+  "User Management": (
+    <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  ),
+  Settings: (
+    <svg className="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+    </svg>
+  ),
+};
+
 const menuMap = {
   admin: [
     { label: "Dashboard", path: "/dashboard" },
@@ -23,72 +62,91 @@ const menuMap = {
   user: [
     { label: "Dashboard", path: "/dashboard" },
     { label: "My Tickets", path: "/tickets" },
-    { label: "Create Ticket", path: "/tickets/create" },
     { label: "Settings", path: "/settings" },
   ],
+};
+
+const roleColors = {
+  admin: { bg: "bg-red-50", text: "text-red-600", dot: "bg-red-500" },
+  agent: { bg: "bg-blue-50", text: "text-blue-600", dot: "bg-blue-500" },
+  user: { bg: "bg-emerald-50", text: "text-emerald-600", dot: "bg-emerald-500" },
 };
 
 export default function Sidebar({ onClose }) {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-
-  // Retrieve the correct menu for the current user's role, or an empty array
   const menu = menuMap[user?.role] || [];
+  const role = user?.role || "user";
+  const roleStyle = roleColors[role] || roleColors.user;
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 text-white flex flex-col h-full md:m-3 md:rounded-2xl md:h-[calc(100vh-24px)] shadow-2xl relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-600/10 to-transparent"></div>
-
-      <div className="p-6 relative z-10 flex items-center gap-2">
-        <div className="bg-white text-blue-600 rounded p-1">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-          </svg>
+    <aside className="w-[260px] bg-white border-r border-slate-200 flex flex-col h-full overflow-hidden shadow-sm">
+      
+      {/* Header & Logo */}
+      <div className="p-5 flex items-center gap-3">
+        <div className="shrink-0">
+          <img src="/logo_t.png" alt="QTechy Logo" className="h-9 w-auto object-contain" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-white tracking-tight leading-none">QTechy</h2>
-          <p className="text-[10px] text-blue-400 uppercase tracking-widest mt-1 font-bold">{user?.role} Portal</p>
+          <h2 className="text-lg font-black text-slate-900 tracking-tight leading-none">QTechy</h2>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <div className={`w-1.5 h-1.5 rounded-full ${roleStyle.dot}`}></div>
+            <p className={`text-[9px] uppercase tracking-wider font-bold ${roleStyle.text}`}>{role} Portal</p>
+          </div>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-2 px-4 relative z-10 mt-4">
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1.5 px-3 mt-4 overflow-y-auto">
+        <p className="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-3 mb-3">Menu</p>
         {menu.map((m) => (
           <NavLink
             key={m.path}
             to={m.path}
             onClick={onClose}
+            end={m.path === "/tickets"}
             className={({ isActive }) =>
-              `block px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300 ${isActive
-                ? "bg-blue-600 text-white shadow-md shadow-blue-900/20"
-                : "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-all duration-150 ${
+                isActive
+                  ? "bg-blue-50 text-blue-700"
+                  : "text-slate-600 hover:bg-slate-100/70 hover:text-slate-900"
               }`
             }
           >
-            {m.label}
+            {({ isActive }) => (
+              <>
+                <span className={isActive ? "text-blue-600" : "text-slate-400"}>
+                  {iconMap[m.label]}
+                </span>
+                {m.label}
+              </>
+            )}
           </NavLink>
         ))}
       </nav>
 
-      <div className="p-4 relative z-10 border-t border-slate-800">
-        <div className="flex items-center gap-3 px-2 mb-4">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-blue-400 flex items-center justify-center font-bold text-white shadow-lg shrink-0 overflow-hidden">
+      {/* User Footer */}
+      <div className="p-4 border-t border-slate-100 bg-slate-50/50 mt-2">
+        <div className="flex items-center gap-3 mb-3 cursor-default">
+          <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs shrink-0 overflow-hidden ring-2 ring-white">
             {user?.avatar ? (
               <img src={user.avatar} className="w-full h-full object-cover" alt="avatar" />
             ) : (
               user?.name?.charAt(0).toUpperCase() || "U"
             )}
           </div>
-          <div className="overflow-hidden">
-            <p className="text-sm font-medium text-white truncate">{user?.name}</p>
-            <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+          <div className="overflow-hidden flex-1 min-w-0">
+            <p className="text-sm font-bold text-slate-900 truncate leading-none">{user?.name}</p>
+            <p className="text-[11px] font-medium text-slate-500 truncate mt-0.5">{user?.email}</p>
           </div>
         </div>
         <button
           onClick={() => dispatch(logout())}
-          className="w-full text-sm text-gray-400 hover:text-white bg-gray-800 hover:bg-gray-700 py-2 rounded-lg transition-colors font-medium border border-gray-700"
+          className="w-full flex items-center justify-center gap-2 text-xs font-bold text-slate-500 hover:text-red-600 bg-white hover:bg-red-50 py-2 rounded-lg transition-all duration-200 border border-slate-200 hover:border-red-200 shadow-sm"
         >
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
           Logout
         </button>
       </div>

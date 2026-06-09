@@ -1,107 +1,121 @@
 /**
- * Login Page
- * Renders the login form and handles user authentication.
+ * Login Page - Premium UI with Video Background
+ * Allows users to authenticate and receive a JWT.
  */
 
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../../features/auth/authSlice";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading, error, user } = useSelector((state) => state.auth);
 
-  // Extract auth state from Redux store
-  const { loading, error } = useSelector((state) => state.auth);
-
-  // Local form state
-  const [form, setForm] = useState({
-    email: "",
-    password: ""
-  });
-
-  /**
-   * Handle input changes and update local state
-   */
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  /**
-   * Handle form submission for login
-   */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Dispatch the async login thunk
-    const res = await dispatch(loginUser(form));
-
-    // Redirect to dashboard on successful login
-    if (loginUser.fulfilled.match(res)) {
+  useEffect(() => {
+    if (user) {
       navigate("/dashboard");
     }
+  }, [user, navigate]);
+
+  const [form, setForm] = useState({ email: "", password: "" });
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    dispatch(loginUser(form));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
       {/* Video Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
-      >
-        <source src="/sky.mp4" type="video/mp4" />
-      </video>
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#0f1728]">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover opacity-40"
+        >
+          <source src="/back.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent" />
+      </div>
 
-      {/* Dim Overlay combined with existing mesh background */}
-      <div className="absolute inset-0 bg-mesh opacity-60 z-0 pointer-events-none"></div>
-      <div className="absolute inset-0 bg-black/20 z-0 pointer-events-none"></div>
+      <div className="relative z-10 w-full max-w-md fade-in-up">
+        {/* Logo/Brand */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-[0_0_40px_rgba(37,99,235,0.4)] mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+              <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-md">Welcome Back</h1>
+          <p className="text-slate-300 mt-2 font-medium drop-shadow">Log in to QTechy Ticket Manager</p>
+        </div>
 
-      <div className="glass-panel p-10 rounded-3xl w-full max-w-sm relative z-10">
-        <h1 className="text-3xl font-bold mb-8 text-center text-white tracking-tight">Welcome Back</h1>
+        <div className="glass-panel rounded-3xl p-8 border-t border-white/20 backdrop-blur-md bg-slate-900/40">
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl flex items-center gap-3 animate-pulse">
+              <svg className="w-5 h-5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <p className="text-sm font-semibold text-red-200">{error}</p>
+            </div>
+          )}
 
-        {/* Display Error Message */}
-        {error && (
-          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
-        )}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-widest mb-1.5 ml-1 drop-shadow">Email Address</label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="name@company.com"
+                className="premium-input bg-white/5 border-white/10 text-white placeholder-slate-400 focus:bg-white/10"
+                required
+              />
+            </div>
+            
+            <div>
+              <div className="flex justify-between items-center mb-1.5 ml-1 drop-shadow">
+                <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-widest">Password</label>
+                <a href="#" className="text-[11px] font-bold text-blue-400 hover:text-blue-300 transition-colors uppercase tracking-widest drop-shadow">Forgot?</a>
+              </div>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className="premium-input bg-white/5 border-white/10 text-white placeholder-slate-400 focus:bg-white/10"
+                required
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <input
-            name="email"
-            type="email"
-            placeholder="Email address"
-            value={form.email}
-            onChange={handleChange}
-            className="premium-input"
-            required
-          />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            className="premium-input"
-            required
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full mt-2"
-          >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
-        </form>
+            <button type="submit" disabled={loading} className="btn-primary w-full mt-6 flex items-center justify-center gap-2 shadow-blue-900/50">
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                "Sign In"
+              )}
+            </button>
+          </form>
 
-        <p className="mt-6 text-center text-sm text-slate-300 font-medium">
-          No account?{" "}
-          <Link to="/register" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">
-            Create one
-          </Link>
-        </p>
+          <div className="mt-8 text-center border-t border-white/10 pt-6">
+            <p className="text-sm text-slate-300 drop-shadow">
+              Don't have an account?{" "}
+              <Link to="/register" className="font-bold text-blue-400 hover:text-blue-300 transition-colors ml-1 drop-shadow">
+                Sign up
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

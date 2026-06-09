@@ -4,7 +4,7 @@
  */
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchUsersAPI, updateUserRoleAPI } from "../../api/userAPI";
+import { fetchUsersAPI, updateUserRoleAPI, deleteUserAPI } from "../../api/userAPI";
 
 /**
  * Async Thunk: Fetch users
@@ -43,6 +43,24 @@ export const updateUserRole = createAsyncThunk(
   }
 );
 
+/**
+ * Async Thunk: Delete a user
+ */
+export const deleteUser = createAsyncThunk(
+  "users/delete",
+  async (id, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().auth.token;
+      await deleteUserAPI(token, id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to delete user"
+      );
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: "users",
   initialState: { 
@@ -76,6 +94,12 @@ const userSlice = createSlice({
           // Update the specific user in the list
           state.list[idx] = action.payload.user;
         }
+      })
+      
+      // Delete User
+      .addCase(deleteUser.fulfilled, (state, action) => {
+        state.list = state.list.filter((u) => u._id !== action.payload);
+        state.total -= 1;
       });
   },
 });

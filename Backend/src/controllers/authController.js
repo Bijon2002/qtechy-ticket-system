@@ -49,9 +49,24 @@ const updateProfile = async (req, res, next) => {
   }
 };
 
+/**
+ * Change current authenticated user password
+ */
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    await authService.changePassword(req.user._id, currentPassword, newPassword);
+    success(res, null, "Password changed successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = { 
   register, 
   login, 
   getMe,
-  updateProfile
+  updateProfile,
+  changePassword
 };
+

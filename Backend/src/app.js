@@ -29,8 +29,9 @@ app.use(
   })
 );
 
-// Built-in middleware for parsing JSON bodies
-app.use(express.json());
+// Built-in middleware for parsing JSON bodies (increased limit for base64 images)
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Morgan is used for logging HTTP requests in development
 app.use(morgan("dev"));

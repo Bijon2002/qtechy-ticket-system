@@ -30,38 +30,43 @@ function SplashScreen({ onComplete }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       onComplete();
-    }, 2500); // 2.5 seconds loading screen
+    }, 1600);
     return () => clearTimeout(timer);
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-950 z-[9999] px-4 text-center">
-      <style>{`
-        @keyframes slide {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(200%); }
-        }
-        .animate-slide {
-          animation: slide 1.5s infinite ease-in-out;
-        }
-      `}</style>
-      <div className="flex flex-col items-center">
-        <div className="w-40 h-40 mb-8 bg-white/5 backdrop-blur-md rounded-[2rem] p-6 shadow-2xl shadow-yellow-500/20 border border-white/10 flex items-center justify-center">
-          <img src="/logo_t.png" alt="QTechy Logo" className="w-full h-full object-contain drop-shadow-2xl animate-pulse" />
+    <div className="fixed inset-0 flex items-center justify-center bg-[#0f1728] z-[9999]">
+      <div className="flex flex-col items-center gap-6">
+        {/* Logo */}
+        <div className="relative">
+          <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-900/50">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
+              <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
+            </svg>
+          </div>
+          {/* Animated ring */}
+          <div className="absolute -inset-2 rounded-2xl border-2 border-blue-500/30 animate-ping" />
         </div>
 
-        <h1 className="text-3xl md:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-yellow-200 tracking-tight mb-2">
-          QTechy Ticketing System
-        </h1>
-        <p className="text-slate-400 font-medium tracking-widest uppercase text-sm mb-10">
-          QTS Initializing...
-        </p>
+        {/* Brand name */}
+        <div className="text-center">
+          <h1 className="text-3xl font-black text-white tracking-tight">QTechy</h1>
+          <p className="text-slate-500 text-sm font-medium tracking-widest uppercase mt-1">Ticket Management</p>
+        </div>
 
-        {/* Custom Loading Bar */}
-        <div className="w-64 max-w-[80vw] h-1.5 bg-slate-800 rounded-full overflow-hidden relative">
-          <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent via-yellow-500 to-transparent animate-slide rounded-full"></div>
+        {/* Loading bar */}
+        <div className="w-40 h-1 bg-slate-800 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full animate-[loading_1.4s_ease-in-out_forwards]"
+            style={{ animation: "loadBar 1.4s ease-out forwards" }} />
         </div>
       </div>
+      <style>{`
+        @keyframes loadBar {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+      `}</style>
     </div>
   );
 }

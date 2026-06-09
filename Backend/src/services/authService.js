@@ -33,6 +33,7 @@ const registerUser = async ({ name, email, password, role }) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatar: user.avatar,
     },
     token,
   };
@@ -64,6 +65,7 @@ const loginUser = async ({ email, password }) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatar: user.avatar,
     },
     token,
   };
@@ -93,8 +95,25 @@ const updateUserProfile = async (userId, updates) => {
   };
 };
 
+/**
+ * Change user password
+ */
+const changePassword = async (userId, currentPassword, newPassword) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error("User not found");
+  
+  const isMatch = await user.matchPassword(currentPassword);
+  if (!isMatch) throw new Error("Current password is incorrect");
+  
+  user.password = newPassword;
+  await user.save();
+  return true;
+};
+
 module.exports = { 
   registerUser, 
   loginUser,
-  updateUserProfile
+  updateUserProfile,
+  changePassword
 };
+

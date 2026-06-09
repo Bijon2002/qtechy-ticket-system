@@ -23,3 +23,9 @@ export const fetchUsersAPI = (token, params) =>
  */
 export const updateUserRoleAPI = (token, id, role) =>
   axios.put(`${BASE}/users/${id}/role`, { role }, authHeader(token));
+
+/**
+ * Delete a user
+ */
+export const deleteUserAPI = (token, id) =>
+  axios.delete(`${BASE}/users/${id}`, authHeader(token));

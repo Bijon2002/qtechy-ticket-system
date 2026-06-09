@@ -38,3 +38,13 @@ export const updateProfileAPI = (data, token) =>
   axios.put(`${BASE}/auth/profile`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
+/**
+ * Change the currently authenticated user's password
+ * @param {Object} data - Current and new password
+ * @param {string} token - JWT authentication token
+ */
+export const changePasswordAPI = (data, token) =>
+  axios.put(`${BASE}/auth/change-password`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });

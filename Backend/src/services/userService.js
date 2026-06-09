@@ -52,7 +52,12 @@ const updateUserRole = async (id, role) => {
   ).select("-password");
 };
 
+const deleteUser = async (id) => {
+  return User.findByIdAndDelete(id);
+};
+
 module.exports = { 
   getAllUsers, 
-  updateUserRole 
+  updateUserRole,
+  deleteUser
 };

@@ -8,6 +8,7 @@ import {
   fetchTicketsAPI,
   createTicketAPI,
   deleteTicketAPI,
+  updateTicketAPI,
 } from "../../api/ticketAPI";
 
 /**
@@ -58,6 +59,22 @@ export const deleteTicket = createAsyncThunk(
   }
 );
 
+/**
+ * Async Thunk: Update a ticket
+ */
+export const updateTicket = createAsyncThunk(
+  "tickets/update",
+  async ({ id, data }, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().auth.token;
+      const res = await updateTicketAPI(token, id, data);
+      return res.data.data;
+    } catch (e) {
+      return rejectWithValue(e.response?.data?.message || "Failed to update ticket");
+    }
+  }
+);
+
 const ticketSlice = createSlice({
   name: "tickets",
   initialState: {
@@ -96,6 +113,14 @@ const ticketSlice = createSlice({
       .addCase(deleteTicket.fulfilled, (state, action) => {
         // Remove the deleted ticket from the list
         state.list = state.list.filter((t) => t._id !== action.payload);
+      })
+      
+      // Update Ticket
+      .addCase(updateTicket.fulfilled, (state, action) => {
+        const idx = state.list.findIndex((t) => t._id === action.payload._id);
+        if (idx !== -1) {
+          state.list[idx] = action.payload;
+        }
       });
   },
 });
