@@ -132,7 +132,7 @@ export default function TicketListPage() {
                   ? ["#", "Title", "Category", "Priority", "Status", "Created By", "Assigned To", "Created", "Actions"]
                   : ["#", "Title", "Category", "Priority", "Status", "Assigned To", "Created", "Actions"]
                 ).map((h) => (
-                  <th key={h} className="px-3 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">{h}</th>
+                  <th key={h} className="px-3 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap last:text-right last:pr-4">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -209,7 +209,7 @@ export default function TicketListPage() {
 
                     {/* Created By (Only for Admin) */}
                     {user?.role === "admin" && (
-                      <td className="px-3 py-3 min-w-[140px]">
+                      <td className="px-3 py-3 whitespace-nowrap">
                         {ticket.createdBy ? (
                           <div className="flex items-center gap-1.5">
                             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center font-bold text-white text-[10px] overflow-hidden shrink-0 ring-1 ring-white">
@@ -230,7 +230,7 @@ export default function TicketListPage() {
                     )}
 
                     {/* Assigned To */}
-                    <td className="px-3 py-3 min-w-[140px]">
+                    <td className="px-3 py-3 whitespace-nowrap">
                       {ticket.assignedTo ? (
                         <div className="flex items-center gap-1.5">
                           <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-500 flex items-center justify-center font-bold text-white text-[10px] overflow-hidden shrink-0 ring-1 ring-white">
@@ -271,8 +271,8 @@ export default function TicketListPage() {
                     </td>
 
                     {/* Actions */}
-                    <td className="px-3 py-3">
-                      <div className="flex items-center gap-0.5">
+                    <td className="px-3 py-3 text-right">
+                      <div className="flex items-center justify-end gap-0.5">
                         <button
                           onClick={() => navigate(`/tickets/${ticket._id}`)}
                           className="px-2 py-1.5 text-[10px] font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 hover:text-blue-700 rounded-md transition-colors border border-blue-100"

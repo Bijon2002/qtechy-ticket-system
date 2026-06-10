@@ -35,8 +35,22 @@ function SplashScreen({ onComplete }) {
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-[#0f1728] z-[9999]">
-      <div className="flex flex-col items-center gap-6">
+    <div className="fixed inset-0 flex items-center justify-center bg-[#0f1728] z-[9999] overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#0f1728]">
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover opacity-40"
+        >
+          <source src="/back.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent" />
+      </div>
+
+      <div className="relative z-10 flex flex-col items-center gap-6">
         {/* Logo */}
         <div className="relative">
           <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-900/50">
