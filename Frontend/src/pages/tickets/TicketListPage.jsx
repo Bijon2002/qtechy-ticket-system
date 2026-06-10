@@ -128,7 +128,10 @@ export default function TicketListPage() {
           <table className="w-full text-sm text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/70">
-                {["#", "Title", "Category", "Priority", "Status", "Assigned To", "Created", "Actions"].map((h) => (
+                {(user?.role === "admin" 
+                  ? ["#", "Title", "Category", "Priority", "Status", "Created By", "Assigned To", "Created", "Actions"]
+                  : ["#", "Title", "Category", "Priority", "Status", "Assigned To", "Created", "Actions"]
+                ).map((h) => (
                   <th key={h} className="px-3 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -137,7 +140,7 @@ export default function TicketListPage() {
               {loading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i} className="border-b border-slate-50">
-                    {[...Array(8)].map((_, j) => (
+                    {[...Array(user?.role === "admin" ? 9 : 8)].map((_, j) => (
                       <td key={j} className="px-3 py-3">
                         <div className="h-4 rounded shimmer" style={{ width: `${60 + (j * 7) % 30}%` }} />
                       </td>
@@ -146,7 +149,7 @@ export default function TicketListPage() {
                 ))
               ) : list.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-16">
+                  <td colSpan={user?.role === "admin" ? 9 : 8} className="text-center py-16">
                     <div className="flex flex-col items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
                         <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -203,6 +206,28 @@ export default function TicketListPage() {
                         {ticket.status}
                       </span>
                     </td>
+
+                    {/* Created By (Only for Admin) */}
+                    {user?.role === "admin" && (
+                      <td className="px-3 py-3 min-w-[140px]">
+                        {ticket.createdBy ? (
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center font-bold text-white text-[10px] overflow-hidden shrink-0 ring-1 ring-white">
+                              {ticket.createdBy.avatar ? (
+                                <img src={ticket.createdBy.avatar} alt="avatar" className="w-full h-full object-cover" />
+                              ) : (
+                                ticket.createdBy.name.charAt(0).toUpperCase()
+                              )}
+                            </div>
+                            <span className="text-[11px] font-semibold text-slate-700 truncate max-w-[80px]" title={ticket.createdBy.name}>
+                              {ticket.createdBy.name}
+                            </span>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] font-medium text-slate-400 italic">Unknown</span>
+                        )}
+                      </td>
+                    )}
 
                     {/* Assigned To */}
                     <td className="px-3 py-3 min-w-[140px]">
@@ -315,126 +340,128 @@ export default function TicketListPage() {
       </div>
 
       {/* Kanban Board */}
-      <div className="mt-10 border-t border-slate-200 pt-8">
-        <div className="flex items-center justify-between mb-6 px-1">
-          <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-            <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
-            </svg>
-            Board
-          </h2>
-        </div>
-        
-        {loading ? (
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 pb-6 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 md:overflow-visible">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="w-[85vw] shrink-0 md:w-auto md:shrink bg-slate-50/80 rounded-lg p-3 min-h-[400px] border border-slate-200/60 snap-center">
-                <div className="h-4 w-24 bg-slate-200 rounded mb-4 shimmer"></div>
-                <div className="space-y-3">
-                  {[...Array(3)].map((_, j) => (
-                    <div key={j} className="h-24 bg-white rounded-md shimmer border border-slate-200"></div>
-                  ))}
-                </div>
-              </div>
-            ))}
+      {user?.role === "agent" && (
+        <div className="mt-10 border-t border-slate-200 pt-8">
+          <div className="flex items-center justify-between mb-6 px-1">
+            <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+              <svg className="w-5 h-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+              </svg>
+              Board
+            </h2>
           </div>
-        ) : (
-          <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 pb-6 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 md:overflow-visible scrollbar-hide">
-            {["Open", "In Progress", "Resolved", "Closed"].map((colStatus) => (
-              <div 
-                key={colStatus}
-                className="w-[85vw] shrink-0 md:w-auto md:shrink bg-[#f8fafc] rounded-lg p-3 min-h-[500px] border border-slate-200 flex flex-col snap-center transition-colors"
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.classList.add("bg-slate-100", "border-blue-300");
-                }}
-                onDragLeave={(e) => {
-                  e.currentTarget.classList.remove("bg-slate-100", "border-blue-300");
-                }}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  e.currentTarget.classList.remove("bg-slate-100", "border-blue-300");
-                  const ticketId = e.dataTransfer.getData("ticketId");
-                  if (ticketId) {
-                    const ticket = list.find(t => t._id === ticketId);
-                    if (ticket && ticket.status !== colStatus) {
-                      dispatch(updateTicket({ id: ticketId, data: { status: colStatus } }));
-                      toast.success(`Moved to ${colStatus}`);
+          
+          {loading ? (
+            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 pb-6 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 md:overflow-visible">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="w-[85vw] shrink-0 md:w-auto md:shrink bg-slate-50/80 rounded-lg p-3 min-h-[400px] border border-slate-200/60 snap-center">
+                  <div className="h-4 w-24 bg-slate-200 rounded mb-4 shimmer"></div>
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, j) => (
+                      <div key={j} className="h-24 bg-white rounded-md shimmer border border-slate-200"></div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 pb-6 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 md:mx-0 md:px-0 md:overflow-visible scrollbar-hide">
+              {["Open", "In Progress", "Resolved", "Closed"].map((colStatus) => (
+                <div 
+                  key={colStatus}
+                  className="w-[85vw] shrink-0 md:w-auto md:shrink bg-[#f8fafc] rounded-lg p-3 min-h-[500px] border border-slate-200 flex flex-col snap-center transition-colors"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.add("bg-slate-100", "border-blue-300");
+                  }}
+                  onDragLeave={(e) => {
+                    e.currentTarget.classList.remove("bg-slate-100", "border-blue-300");
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.classList.remove("bg-slate-100", "border-blue-300");
+                    const ticketId = e.dataTransfer.getData("ticketId");
+                    if (ticketId) {
+                      const ticket = list.find(t => t._id === ticketId);
+                      if (ticket && ticket.status !== colStatus) {
+                        dispatch(updateTicket({ id: ticketId, data: { status: colStatus } }));
+                        toast.success(`Moved to ${colStatus}`);
+                      }
                     }
-                  }
-                }}
-              >
-                <div className="flex items-center justify-between mb-3 px-1">
-                  <h3 className="font-semibold text-slate-700 text-sm flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${
-                      colStatus === 'Open' ? 'bg-red-500' :
-                      colStatus === 'In Progress' ? 'bg-blue-500' :
-                      colStatus === 'Resolved' ? 'bg-green-500' : 'bg-slate-400'
-                    }`} />
-                    {colStatus}
-                  </h3>
-                  <span className="bg-slate-200/70 text-slate-600 font-medium px-2 py-0.5 rounded text-xs">
-                    {list.filter(t => t.status === colStatus).length}
-                  </span>
-                </div>
-                
-                <div className="space-y-3 flex-1">
-                  {list.filter(t => t.status === colStatus).map((ticket) => (
-                    <div
-                      key={ticket._id}
-                      draggable
-                      onDragStart={(e) => {
-                        e.dataTransfer.setData("ticketId", ticket._id);
-                        e.dataTransfer.effectAllowed = "move";
-                      }}
-                      className="bg-white rounded-md p-3 cursor-grab active:cursor-grabbing shadow-sm border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all group"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-mono text-xs font-medium text-slate-500 group-hover:text-blue-600 transition-colors">
-                          {ticket.ticketNumber}
-                        </span>
-                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${priorityConfig[ticket.priority]?.bg || "bg-slate-100 text-slate-600"}`}>
-                          {ticket.priority}
-                        </span>
-                      </div>
-                      
-                      <button 
-                        onClick={() => navigate(`/tickets/${ticket._id}`)}
-                        className="text-sm font-medium text-slate-900 mb-3 text-left w-full hover:text-blue-600 line-clamp-2"
-                      >
-                        {ticket.title}
-                      </button>
-                      
-                      <div className="flex justify-between items-center mt-auto">
-                        <span className="text-xs text-slate-500 truncate max-w-[120px]">
-                          {ticket.category}
-                        </span>
-                        {ticket.assignedTo ? (
-                          <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center font-medium text-slate-600 text-[10px] overflow-hidden border border-slate-200" title={ticket.assignedTo.name}>
-                            {ticket.assignedTo.avatar ? (
-                              <img src={ticket.assignedTo.avatar} alt="avatar" className="w-full h-full object-cover" />
-                            ) : (
-                              ticket.assignedTo.name.charAt(0).toUpperCase()
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-[10px] text-slate-400">Unassigned</span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-3 px-1">
+                    <h3 className="font-semibold text-slate-700 text-sm flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${
+                        colStatus === 'Open' ? 'bg-red-500' :
+                        colStatus === 'In Progress' ? 'bg-blue-500' :
+                        colStatus === 'Resolved' ? 'bg-green-500' : 'bg-slate-400'
+                      }`} />
+                      {colStatus}
+                    </h3>
+                    <span className="bg-slate-200/70 text-slate-600 font-medium px-2 py-0.5 rounded text-xs">
+                      {list.filter(t => t.status === colStatus).length}
+                    </span>
+                  </div>
                   
-                  {list.filter(t => t.status === colStatus).length === 0 && (
-                    <div className="h-24 flex items-center justify-center border border-dashed border-slate-300 rounded-md bg-slate-50/50">
-                      <span className="text-sm text-slate-400">Drop tickets here</span>
-                    </div>
-                  )}
+                  <div className="space-y-3 flex-1">
+                    {list.filter(t => t.status === colStatus).map((ticket) => (
+                      <div
+                        key={ticket._id}
+                        draggable
+                        onDragStart={(e) => {
+                          e.dataTransfer.setData("ticketId", ticket._id);
+                          e.dataTransfer.effectAllowed = "move";
+                        }}
+                        className="bg-white rounded-md p-3 cursor-grab active:cursor-grabbing shadow-sm border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all group"
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-mono text-xs font-medium text-slate-500 group-hover:text-blue-600 transition-colors">
+                            {ticket.ticketNumber}
+                          </span>
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${priorityConfig[ticket.priority]?.bg || "bg-slate-100 text-slate-600"}`}>
+                            {ticket.priority}
+                          </span>
+                        </div>
+                        
+                        <button 
+                          onClick={() => navigate(`/tickets/${ticket._id}`)}
+                          className="text-sm font-medium text-slate-900 mb-3 text-left w-full hover:text-blue-600 line-clamp-2"
+                        >
+                          {ticket.title}
+                        </button>
+                        
+                        <div className="flex justify-between items-center mt-auto">
+                          <span className="text-xs text-slate-500 truncate max-w-[120px]">
+                            {ticket.category}
+                          </span>
+                          {ticket.assignedTo ? (
+                            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center font-medium text-slate-600 text-[10px] overflow-hidden border border-slate-200" title={ticket.assignedTo.name}>
+                              {ticket.assignedTo.avatar ? (
+                                <img src={ticket.assignedTo.avatar} alt="avatar" className="w-full h-full object-cover" />
+                              ) : (
+                                ticket.assignedTo.name.charAt(0).toUpperCase()
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-slate-400">Unassigned</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {list.filter(t => t.status === colStatus).length === 0 && (
+                      <div className="h-24 flex items-center justify-center border border-dashed border-slate-300 rounded-md bg-slate-50/50">
+                        <span className="text-sm text-slate-400">Drop tickets here</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && createPortal(
