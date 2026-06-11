@@ -5,8 +5,7 @@
 
 const router = require("express").Router();
 const { protect, authorize } = require("../middleware/authMiddleware");
-const userService = require("../services/userService");
-const { success } = require("../utils/apiResponse");
+const userController = require("../controllers/userController");
 
 // All routes in this file require authentication and admin role
 router.use(protect, authorize("admin"));
@@ -14,37 +13,16 @@ router.use(protect, authorize("admin"));
 /**
  * Get all users with optional filtering and pagination
  */
-router.get("/", async (req, res, next) => {
-  try {
-    const data = await userService.getAllUsers(req.query);
-    success(res, data, "Users fetched successfully");
-  } catch (err) {
-    next(err);
-  }
-});
+router.get("/", userController.getAllUsers);
 
 /**
  * Update a user's role
  */
-router.put("/:id/role", async (req, res, next) => {
-  try {
-    const updatedUser = await userService.updateUserRole(req.params.id, req.body.role);
-    success(res, updatedUser, "Role updated successfully");
-  } catch (err) {
-    next(err);
-  }
-});
+router.put("/:id/role", userController.updateUserRole);
 
 /**
  * Delete a user
  */
-router.delete("/:id", async (req, res, next) => {
-  try {
-    await userService.deleteUser(req.params.id);
-    success(res, null, "User deleted successfully");
-  } catch (err) {
-    next(err);
-  }
-});
+router.delete("/:id", userController.deleteUser);
 
 module.exports = router;
