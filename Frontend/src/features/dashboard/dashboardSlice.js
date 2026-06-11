@@ -4,9 +4,7 @@
  */
 
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { fetchStatsAPI } from "../../api/dashboardAPI";
 
 /**
  * Async Thunk: Fetch dashboard statistics
@@ -17,9 +15,7 @@ export const fetchStats = createAsyncThunk(
     try {
       const token = getState().auth.token;
       
-      const res = await axios.get(`${BASE}/dashboard/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetchStatsAPI(token);
       
       return res.data.data;
     } catch (e) {
