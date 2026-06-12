@@ -11,6 +11,7 @@ import { Toaster } from "react-hot-toast";
 // Public Pages
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage";
 
 // Protected Pages
 import DashboardPage from "./pages/dashboard/DashboardPage";
@@ -102,6 +103,7 @@ function App() {
           {/* ======================= */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
           {/* ======================= */}
           {/*     Protected Routes    */}

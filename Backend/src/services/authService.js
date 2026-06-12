@@ -5,6 +5,7 @@
 
 const User = require("../models/User");
 const { generateToken } = require("../utils/jwtUtils");
+const { sendEmail } = require("../utils/emailUtils");
 
 /**
  * Register a new user in the database
@@ -110,10 +111,96 @@ const changePassword = async (userId, currentPassword, newPassword) => {
   return true;
 };
 
+/**
+ * Generate a reset code, save it to the user, and send an email
+ */
+const generateResetCode = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    // We don't want to reveal whether a user exists, so we just return true
+    return true;
+  }
+
+  // Generate a 6-digit code
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  
+  // Save code to user document, expires in 15 minutes
+  user.resetPasswordCode = resetCode;
+  user.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+  await user.save();
+
+  // Send the email
+  const emailSent = await sendEmail({
+    to: user.email,
+    subject: "Password Reset Code",
+    text: `You requested a password reset. Your 6-digit code is: ${resetCode}\n\nThis code will expire in 15 minutes.`,
+    html: `
+      <h2>Password Reset Request</h2>
+      <p>You requested a password reset. Your 6-digit code is:</p>
+      <h3 style="background: #f4f4f4; padding: 10px; display: inline-block; letter-spacing: 2px;">${resetCode}</h3>
+      <p>This code will expire in 15 minutes.</p>
+      <p>If you did not request this, please ignore this email.</p>
+    `,
+  });
+
+  if (!emailSent) {
+    // If email failed to send, remove the code
+    user.resetPasswordCode = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    throw new Error("Failed to send email");
+  }
+
+  return true;
+};
+
+/**
+ * Verify a reset code
+ */
+const verifyResetCode = async (email, code) => {
+  const user = await User.findOne({
+    email,
+    resetPasswordCode: code,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new Error("Invalid or expired reset code");
+  }
+
+  return true;
+};
+
+/**
+ * Reset the password using the code
+ */
+const resetPassword = async (email, code, newPassword) => {
+  const user = await User.findOne({
+    email,
+    resetPasswordCode: code,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new Error("Invalid or expired reset code");
+  }
+
+  // Update password and clear reset fields
+  user.password = newPassword;
+  user.resetPasswordCode = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+
+  return true;
+};
+
 module.exports = { 
   registerUser, 
   loginUser,
   updateUserProfile,
-  changePassword
+  changePassword,
+  generateResetCode,
+  verifyResetCode,
+  resetPassword
 };
 

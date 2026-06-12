@@ -3,9 +3,9 @@
  * This file connects to the database and starts the Express server.
  */
 
+require("dotenv").config();
 const app = require("./app");
 const connectDB = require("./config/db");
-require("dotenv").config();
 
 // Define the port, defaulting to 5000 if not specified in environment variables
 const PORT = process.env.PORT || 5000;

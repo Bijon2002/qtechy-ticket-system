@@ -48,3 +48,21 @@ export const changePasswordAPI = (data, token) =>
   axios.put(`${BASE}/auth/change-password`, data, {
     headers: { Authorization: `Bearer ${token}` },
   });
+
+/**
+ * Request a password reset code
+ * @param {Object} data - Email
+ */
+export const forgotPasswordAPI = (data) => axios.post(`${BASE}/auth/forgot-password`, data);
+
+/**
+ * Verify a password reset code
+ * @param {Object} data - Email and code
+ */
+export const verifyResetCodeAPI = (data) => axios.post(`${BASE}/auth/verify-reset-code`, data);
+
+/**
+ * Reset password using the code
+ * @param {Object} data - Email, code, and newPassword
+ */
+export const resetPasswordAPI = (data) => axios.post(`${BASE}/auth/reset-password`, data);
