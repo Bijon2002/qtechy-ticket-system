@@ -130,26 +130,17 @@ const generateResetCode = async (email) => {
   await user.save();
 
   // Send the email
-  const emailSent = await sendEmail({
+  await sendEmail({
     to: user.email,
     subject: "Password Reset Code",
     text: `You requested a password reset. Your 6-digit code is: ${resetCode}\n\nThis code will expire in 15 minutes.`,
     html: `
-      <h2>Password Reset Request</h2>
+      <h2>Password Reset</h2>
       <p>You requested a password reset. Your 6-digit code is:</p>
-      <h3 style="background: #f4f4f4; padding: 10px; display: inline-block; letter-spacing: 2px;">${resetCode}</h3>
+      <h1 style="font-size: 32px; letter-spacing: 2px;">${resetCode}</h1>
       <p>This code will expire in 15 minutes.</p>
-      <p>If you did not request this, please ignore this email.</p>
     `,
   });
-
-  if (!emailSent) {
-    // If email failed to send, remove the code
-    user.resetPasswordCode = undefined;
-    user.resetPasswordExpires = undefined;
-    await user.save();
-    throw new Error("Failed to send email");
-  }
 
   return true;
 };
